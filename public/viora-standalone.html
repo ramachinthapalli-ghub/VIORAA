@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viora — 5-Min Daily Play for Working Mothers</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .font-display { font-family: 'Playfair Display', Georgia, serif; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes pulse-dot { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+    .animate-pulse-dot { animation: pulse-dot 1.2s infinite ease-in-out; }
+  </style>
+</head>
+<body class="bg-stone-100 text-stone-900 min-h-screen flex flex-col antialiased selection:bg-amber-200">
+
+  <!-- ================= TOP TOOLBAR & CONTROLS ================= -->
+  <header class="sticky top-0 z-40 bg-stone-900 text-stone-100 border-b border-stone-800 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-amber-500 flex items-center justify-center text-stone-950 font-black text-xs">
+          V
+        </div>
+        <span class="font-bold text-sm tracking-tight text-stone-100">Viora</span>
+        <span class="text-stone-400 text-[11px] hidden sm:inline">• 5-min daily play</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Viewport Switcher -->
+        <div class="flex items-center bg-stone-800 rounded-lg p-0.5 border border-stone-700">
+          <button id="view-mobile-btn" onclick="setViewMode('mobile')" class="px-2 py-1 rounded bg-amber-500 text-stone-950 font-bold flex items-center gap-1">
+            <span>📱 Mobile</span>
+          </button>
+          <button id="view-desktop-btn" onclick="setViewMode('desktop')" class="px-2 py-1 rounded text-stone-400 hover:text-stone-200 flex items-center gap-1 font-medium">
+            <span>💻 Desktop</span>
+          </button>
+        </div>
+
+        <!-- Research Drawer Button -->
+        <button onclick="toggleResearch(true)" class="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 border border-stone-700 font-medium text-[11px] flex items-center gap-1">
+          <span>📖 Specs</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 4 Stage Buttons -->
+    <div class="bg-stone-950/80 border-t border-stone-800/80 px-4 py-1.5">
+      <div class="max-w-5xl mx-auto flex items-center justify-between gap-2 overflow-x-auto scrollbar-none">
+        <div class="flex items-center gap-1 sm:gap-2">
+          <button id="tab-1" onclick="goToStage(1)" class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+            <span class="w-4 h-4 rounded-full bg-amber-400 text-stone-950 text-[10px] font-bold flex items-center justify-center">1</span>
+            <span>Profile</span>
+          </button>
+          <span class="text-stone-700 text-xs">›</span>
+          <button id="tab-2" onclick="goToStage(2)" class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-stone-400 hover:text-stone-200">
+            <span class="w-4 h-4 rounded-full bg-stone-800 text-stone-400 text-[10px] font-bold flex items-center justify-center">2</span>
+            <span>Focus</span>
+          </button>
+          <span class="text-stone-700 text-xs">›</span>
+          <button id="tab-3" onclick="goToStage(3)" class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-stone-400 hover:text-stone-200">
+            <span class="w-4 h-4 rounded-full bg-stone-800 text-stone-400 text-[10px] font-bold flex items-center justify-center">3</span>
+            <span>Play</span>
+          </button>
+          <span class="text-stone-700 text-xs">›</span>
+          <button id="tab-4" onclick="goToStage(4)" class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-stone-400 hover:text-stone-200">
+            <span class="w-4 h-4 rounded-full bg-stone-800 text-stone-400 text-[10px] font-bold flex items-center justify-center">4</span>
+            <span>Done</span>
+          </button>
+        </div>
+
+        <button id="quick-next-btn" onclick="nextStage()" class="text-xs font-semibold text-amber-300 hover:text-amber-200 bg-amber-950/40 px-2.5 py-1 rounded-lg border border-amber-500/30 flex items-center gap-1 shrink-0">
+          <span>Next</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN VIEWPORT CONTAINER ================= -->
+  <main class="flex-1 flex flex-col items-center justify-start p-3 sm:p-6 md:p-8">
+    <div id="device-wrapper" class="w-full max-w-[420px] my-auto transition-all duration-300">
+      
+      <!-- Mobile Hardware Shell -->
+      <div id="phone-frame" class="bg-stone-900 p-2.5 sm:p-3 rounded-[40px] shadow-2xl ring-1 ring-stone-800/80 border-4 border-stone-800">
+        <div class="bg-stone-50 rounded-[32px] overflow-hidden min-h-[640px] max-h-[82vh] flex flex-col relative border border-stone-200">
+          
+          <!-- Mobile Status Bar (9:41) -->
+          <div class="bg-stone-900 text-stone-100 px-5 py-2 flex items-center justify-between text-xs font-semibold shrink-0 select-none">
+            <span class="text-[11px]">9:41</span>
+            <div class="w-16 h-3 bg-black rounded-full mx-auto"></div>
+            <div class="flex items-center gap-1 text-[10px]">
+              <span>5G</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          <!-- In-App Header -->
+          <div class="bg-white px-4 py-2.5 border-b border-stone-200/80 flex items-center justify-between shrink-0 shadow-2xs">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center text-stone-950 font-black text-xs shadow-xs">
+                V
+              </div>
+              <div>
+                <div class="text-xs font-bold text-stone-900 leading-tight">Viora</div>
+                <div class="text-[10px] text-stone-500 leading-tight">5-min daily play</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+              <span id="step-indicator">Step 1/4</span>
+            </div>
+          </div>
+
+          <!-- App Scrollable Views -->
+          <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            
+            <!-- ====== STAGE 1: PROFILE ====== -->
+            <section id="stage-1" class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h1 class="text-xl font-bold text-stone-900 tracking-tight"><span class="child-name-text">Vira</span>'s Profile</h1>
+                  <p class="text-xs text-stone-500">Age <span id="age-display">2.6</span> • <span id="time-display">10</span> mins daily play</p>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center text-sm font-bold text-amber-900">
+                  👧🏽
+                </div>
+              </div>
+
+              <div class="bg-white rounded-2xl p-4 border border-stone-200/90 shadow-2xs space-y-3.5">
+                <!-- Name & Age Input Row -->
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[11px] font-bold text-stone-600 mb-1">Name</label>
+                    <input id="name-input" type="text" value="Vira" oninput="updateChildName(this.value)" class="w-full px-3 py-1.5 text-sm bg-stone-50 border border-stone-200 rounded-xl font-semibold text-stone-900 focus:outline-none focus:border-amber-500" />
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold text-stone-600 mb-1">Age</label>
+                    <div class="flex gap-1">
+                      <select id="age-years" onchange="updateAge()" class="w-1/2 px-1.5 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-xl font-semibold text-stone-900 focus:outline-none">
+                        <option value="1">1y</option>
+                        <option value="2" selected>2y</option>
+                        <option value="3">3y</option>
+                      </select>
+                      <select id="age-months" onchange="updateAge()" class="w-1/2 px-1.5 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-xl font-semibold text-stone-900 focus:outline-none">
+                        <option value="0">0m</option>
+                        <option value="3">3m</option>
+                        <option value="6" selected>6m</option>
+                        <option value="9">9m</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Lately Doing Interactive Chips -->
+                <div class="space-y-1.5">
+                  <span class="text-xs font-bold text-stone-700 block">Lately doing</span>
+                  <div id="skills-container" class="flex flex-wrap gap-1.5 text-xs">
+                    <!-- Populated by JS -->
+                  </div>
+                </div>
+
+                <!-- Home Interests Interactive Chips -->
+                <div class="space-y-1.5">
+                  <span class="text-xs font-bold text-stone-700 block">Loves right now</span>
+                  <div id="interests-container" class="flex flex-wrap gap-1.5 text-xs">
+                    <!-- Populated by JS -->
+                  </div>
+                </div>
+
+                <!-- Daily Time Window -->
+                <div class="space-y-1 pt-1">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-stone-700">Daily play window</span>
+                    <span id="window-label" class="text-xs text-amber-700 font-bold">10 mins</span>
+                  </div>
+                  <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
+                    <button type="button" onclick="setDailyMinutes(5)" id="min-btn-5" class="py-2 rounded-xl border border-stone-200 bg-stone-50 text-stone-600 font-semibold transition">
+                      5 mins
+                    </button>
+                    <button type="button" onclick="setDailyMinutes(10)" id="min-btn-10" class="py-2 rounded-xl border border-amber-500 bg-amber-50 text-amber-900 ring-1 ring-amber-500 font-bold transition">
+                      10 mins
+                      <span class="block text-[9px] text-amber-600 font-normal">Recommended</span>
+                    </button>
+                    <button type="button" onclick="setDailyMinutes(15)" id="min-btn-15" class="py-2 rounded-xl border border-stone-200 bg-stone-50 text-stone-600 font-semibold transition">
+                      15 mins
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Caregiver Team -->
+                <div class="pt-2 border-t border-stone-100 flex items-center justify-between text-xs">
+                  <span class="text-stone-500 font-medium">Caregiver team:</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="bg-stone-100 px-2 py-0.5 rounded-full text-xs font-medium text-stone-700">👩🏽 Vijju (Nanny)</span>
+                    <span class="bg-stone-100 px-2 py-0.5 rounded-full text-xs font-medium text-stone-700">👵🏽 Dadi</span>
+                  </div>
+                </div>
+
+                <!-- Action Button -->
+                <button onclick="goToStage(2)" class="w-full py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 font-bold text-xs sm:text-sm rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+                  <span>See This Week's Focus</span>
+                  <span>→</span>
+                </button>
+              </div>
+            </section>
+
+            <!-- ====== STAGE 2: FOCUS ====== -->
+            <section id="stage-2" class="space-y-3 hidden">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-bold tracking-wider uppercase text-amber-600">This Week's Focus</span>
+                  <h1 class="text-xl font-bold text-stone-900 tracking-tight">Two-Word Phrases</h1>
+                </div>
+                <span class="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-full text-xs font-bold">
+                  <span class="child-name-text">Vira</span> • <span id="focus-age-badge">2.6y</span>
+                </span>
+              </div>
+
+              <div class="bg-white rounded-2xl border border-stone-200/90 p-4 sm:p-5 shadow-2xs space-y-3.5">
+                <!-- Visual Topic Pill -->
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg">
+                    🗣️
+                  </div>
+                  <div>
+                    <div class="text-sm font-bold text-stone-900 leading-tight">Action + Noun</div>
+                    <div class="text-[11px] text-stone-500">e.g. &ldquo;car go&rdquo;, &ldquo;more paani&rdquo;, &ldquo;big ball&rdquo;</div>
+                  </div>
+                </div>
+
+                <!-- 1 Plain Sentence -->
+                <div class="bg-stone-50 rounded-xl p-3 border border-stone-200 text-xs text-stone-700 leading-relaxed">
+                  At 2.6 years, pairing an action with a noun helps <span class="child-name-text">Vira</span> speak clearly and prevents toddler frustration.
+                </div>
+
+                <!-- Golden Rule -->
+                <div class="bg-emerald-50/80 border border-emerald-200 rounded-xl p-3 flex items-start gap-2.5 text-xs">
+                  <span class="text-base">💡</span>
+                  <div>
+                    <strong class="text-emerald-950 font-bold block">Quick Rule</strong>
+                    <p class="text-emerald-900 text-xs mt-0.5">
+                      When <span class="child-name-text">Vira</span> says <strong>1 word</strong>, repeat back with <strong>2 words</strong>.
+                    </p>
+                    <p class="text-emerald-800 text-[11px] mt-1 italic">
+                      She says &ldquo;Gaddi&rdquo; → You say &ldquo;Gaddi fast!&rdquo;
+                    </p>
+                  </div>
+                </div>
+
+                <!-- What to listen for -->
+                <div class="space-y-1.5">
+                  <span class="text-xs font-bold text-stone-700 block">Listen for</span>
+                  <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200 text-stone-700">
+                      <span class="font-bold text-stone-900 block">✓ Any 2 words</span>
+                      <span class="text-[11px] text-stone-500">&ldquo;Bye papa&rdquo;, &ldquo;Red car&rdquo;</span>
+                    </div>
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200 text-stone-700">
+                      <span class="font-bold text-stone-900 block">✓ Mimicking</span>
+                      <span class="text-[11px] text-stone-500">Echoing your 2nd word</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="pt-2 flex gap-2">
+                  <button onclick="goToStage(1)" class="w-1/3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-semibold">
+                    Back
+                  </button>
+                  <button onclick="goToStage(3)" class="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs sm:text-sm rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs">
+                    <span>See 2 Activities (5m)</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- ====== STAGE 3: ACTIVITIES ====== -->
+            <section id="stage-3" class="space-y-3 hidden">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-bold tracking-wider uppercase text-amber-600">5-Minute Play</span>
+                  <h1 class="text-xl font-bold text-stone-900 tracking-tight">Pick 1 for Today</h1>
+                </div>
+                <span class="text-xs text-stone-500 font-medium">Zero prep</span>
+              </div>
+
+              <div class="space-y-3">
+                <!-- Activity 1: Katori Tap -->
+                <div id="card-act-1" class="bg-white rounded-2xl border border-stone-200 p-4 shadow-2xs space-y-2.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                      <span class="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center text-xs">🥣</span>
+                      <span>The Kitchen "Katori Tap" Game</span>
+                    </span>
+                    <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">5 mins</span>
+                  </div>
+
+                  <div class="text-[11px] text-stone-500 flex items-center gap-1.5">
+                    <span>Kitchen milk routine</span>
+                    <span>•</span>
+                    <span>2 steel bowls, 1 spoon</span>
+                  </div>
+
+                  <p class="text-xs text-stone-700 bg-stone-50 p-2.5 rounded-xl border border-stone-150 leading-relaxed">
+                    Tap the bowl saying: <strong>&ldquo;Tez bajao!&rdquo;</strong> or <strong>&ldquo;Slow bajao!&rdquo;</strong> Wait 4 seconds for <span class="child-name-text">Vira</span> to repeat.
+                  </p>
+
+                  <div class="flex items-center gap-2 pt-1">
+                    <button onclick="launchTimer('The Kitchen Katori Tap Game', 300)" class="flex-1 py-2 px-3 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+                      <span>▶ Play (5m)</span>
+                    </button>
+                    <button onclick="openWhatsAppModal('The Kitchen Katori Tap Game')" class="py-2 px-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                      <span>💬 WhatsApp Vijju</span>
+                    </button>
+                    <button onclick="toggleCardDone('card-act-1')" class="p-2 rounded-xl border border-stone-200 text-stone-400 hover:bg-stone-100 transition" title="Mark as done">
+                      ✓
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Activity 2: Cushion Ramp -->
+                <div id="card-act-2" class="bg-white rounded-2xl border border-stone-200 p-4 shadow-2xs space-y-2.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                      <span class="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center text-xs">🚗</span>
+                      <span>Car Garage "Go & Stop" Barrier</span>
+                    </span>
+                    <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">5 mins</span>
+                  </div>
+
+                  <div class="text-[11px] text-stone-500 flex items-center gap-1.5">
+                    <span>Living room wind-down</span>
+                    <span>•</span>
+                    <span>1 sofa cushion, 1 toy car</span>
+                  </div>
+
+                  <p class="text-xs text-stone-700 bg-stone-50 p-2.5 rounded-xl border border-stone-150 leading-relaxed">
+                    Hold car at slope top. Say <strong>&ldquo;Ready 1, 2, 3...&rdquo;</strong> and pause until <span class="child-name-text">Vira</span> shouts <strong>&ldquo;Car go!&rdquo;</strong> before letting it zoom.
+                  </p>
+
+                  <div class="flex items-center gap-2 pt-1">
+                    <button onclick="launchTimer('Car Garage Ramp', 300)" class="flex-1 py-2 px-3 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+                      <span>▶ Play (5m)</span>
+                    </button>
+                    <button onclick="openWhatsAppModal('Car Garage Ramp')" class="py-2 px-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+                      <span>💬 WhatsApp Vijju</span>
+                    </button>
+                    <button onclick="toggleCardDone('card-act-2')" class="p-2 rounded-xl border border-stone-200 text-stone-400 hover:bg-stone-100 transition" title="Mark as done">
+                      ✓
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Navigation buttons -->
+                <div class="pt-2 flex gap-2">
+                  <button onclick="goToStage(2)" class="w-1/3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-semibold">
+                    Back
+                  </button>
+                  <button onclick="goToStage(4)" class="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs sm:text-sm rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs">
+                    <span>Delegate & Reflect</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- ====== STAGE 4: DONE & DELEGATE ====== -->
+            <section id="stage-4" class="space-y-3 hidden">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-bold tracking-wider uppercase text-amber-600">Handoff & Done</span>
+                  <h1 class="text-xl font-bold text-stone-900 tracking-tight">Share or Wrap Up</h1>
+                </div>
+                <span class="text-xs text-stone-500 font-medium">10 seconds</span>
+              </div>
+
+              <!-- WhatsApp Card -->
+              <div class="bg-white rounded-2xl border border-stone-200/90 p-4 shadow-2xs space-y-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-stone-900">Send to Caregiver</span>
+                    <span class="text-[11px] text-stone-500">(Vijju Didi)</span>
+                  </div>
+                  <div class="flex gap-1 text-xs">
+                    <button id="lang-btn-hi" onclick="setLanguage('Hindi')" class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-500 text-stone-950">
+                      Hindi
+                    </button>
+                    <button id="lang-btn-en" onclick="setLanguage('English')" class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-stone-100 text-stone-600">
+                      English
+                    </button>
+                  </div>
+                </div>
+
+                <div class="bg-[#EFEAE2] p-3 rounded-xl border border-stone-300/70 text-xs text-stone-800 space-y-2">
+                  <p id="whatsapp-body-text" class="leading-relaxed">
+                    नमस्ते विज्जू दीदी! आज 4 बजे स्नैक के बाद वीरा के साथ 5 मिनट कटोरी-चम्मच वाला खेल खेलिएगा। चम्मच बजाते समय बोलिए &ldquo;तेज़ बजाओ&rdquo; ताकि वह 2 शब्द बोलना सीखे। धन्यवाद!
+                  </p>
+                  <div class="flex items-center justify-between pt-1 border-t border-stone-300/40">
+                    <button onclick="copyMessage()" class="text-[11px] font-semibold text-stone-700 hover:text-stone-900 flex items-center gap-1 cursor-pointer">
+                      📋 <span id="copy-label">Copy</span>
+                    </button>
+                    <button onclick="openWhatsAppModal('Katori Tap Game')" class="px-3 py-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-lg text-xs font-bold transition shadow-2xs flex items-center gap-1 cursor-pointer">
+                      💬 <span>Send WhatsApp</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 1-Tap Reflection -->
+              <div class="bg-white rounded-2xl border border-stone-200/90 p-4 shadow-2xs space-y-2.5">
+                <h2 class="text-xs font-bold text-stone-800">How did it go today?</h2>
+                <div class="grid grid-cols-3 gap-2">
+                  <button id="btn-ref-loved" onclick="recordFeedback('loved')" class="p-2.5 rounded-xl border border-stone-200 hover:border-emerald-500 bg-stone-50 text-center text-xs flex flex-col items-center gap-1 transition">
+                    <span class="text-xl">🌟</span>
+                    <span class="font-semibold text-xs leading-tight">Loved it</span>
+                  </button>
+                  <button id="btn-ref-nanny" onclick="recordFeedback('nanny')" class="p-2.5 rounded-xl border border-stone-200 hover:border-blue-500 bg-stone-50 text-center text-xs flex flex-col items-center gap-1 transition">
+                    <span class="text-xl">🤝</span>
+                    <span class="font-semibold text-xs leading-tight">Vijju did it</span>
+                  </button>
+                  <button id="btn-ref-skipped" onclick="recordFeedback('skipped')" class="p-2.5 rounded-xl border border-stone-200 hover:border-purple-500 bg-stone-50 text-center text-xs flex flex-col items-center gap-1 transition">
+                    <span class="text-xl">☕</span>
+                    <span class="font-semibold text-xs leading-tight">Skipped</span>
+                  </button>
+                </div>
+
+                <div id="reflection-toast" class="hidden p-2.5 rounded-xl bg-stone-900 text-stone-100 text-xs flex items-center gap-2">
+                  <span class="text-amber-400">✨</span>
+                  <span id="toast-text" class="text-stone-200 text-xs">Saved!</span>
+                </div>
+              </div>
+
+              <!-- Navigation -->
+              <div class="pt-2 flex gap-2">
+                <button onclick="goToStage(3)" class="w-1/3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-semibold">
+                  Back
+                </button>
+                <button onclick="goToStage(1)" class="flex-1 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                  <span>🔄 New Week</span>
+                </button>
+              </div>
+            </section>
+
+          </div>
+
+          <!-- Phone Home Bar -->
+          <div class="bg-stone-100 py-1.5 border-t border-stone-200 flex justify-center shrink-0">
+            <div class="w-24 h-1 bg-stone-400 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= TIMER / ACTIVITY MODAL ================= -->
+  <div id="timer-modal" class="fixed inset-0 bg-black/60 backdrop-blur-2xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl border border-stone-200">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">5-Min Play</span>
+        <button onclick="closeTimerModal()" class="text-stone-400 hover:text-stone-700 font-bold text-sm">✕</button>
+      </div>
+
+      <h3 id="modal-activity-title" class="text-base font-bold text-stone-900">Katori & Spoon Tap</h3>
+
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+        <div class="text-xs text-amber-800 font-medium mb-1">Session Timer</div>
+        <div id="modal-timer-digits" class="text-4xl font-mono font-black text-stone-900">05:00</div>
+        <div class="flex justify-center gap-2 mt-3">
+          <button id="modal-timer-play-btn" onclick="toggleTimer()" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition">
+            Start
+          </button>
+          <button onclick="resetTimer()" class="px-3 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl text-xs font-semibold transition">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <div class="p-3 bg-stone-50 rounded-xl text-xs text-stone-700 leading-relaxed border border-stone-150">
+        💡 <strong>Quick Cue:</strong> Repeat 2-word pairs (&ldquo;Tap fast!&rdquo; or &ldquo;Car go!&rdquo;) and wait 4 seconds for <span class="child-name-text">Vira</span> to reply.
+      </div>
+
+      <button onclick="finishTimerAndWrapUp()" class="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition">
+        Finished (Wrap Up) →
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= WHATSAPP SIMULATION MODAL ================= -->
+  <div id="whatsapp-modal" class="fixed inset-0 bg-black/60 backdrop-blur-2xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-[#EFEAE2] rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-stone-300">
+      <!-- WhatsApp Header -->
+      <div class="bg-[#075E54] text-white p-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-900 font-bold flex items-center justify-center text-xs">
+            👩🏽
+          </div>
+          <div>
+            <div class="text-xs font-bold leading-tight">Vijju Didi (Nanny)</div>
+            <div class="text-[10px] text-emerald-200 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span>
+              <span>online</span>
+            </div>
+          </div>
+        </div>
+        <button onclick="closeWhatsAppModal()" class="text-white hover:text-emerald-100 font-bold text-sm">✕</button>
+      </div>
+
+      <!-- Chat Body -->
+      <div class="p-4 space-y-3 min-h-[220px]">
+        <!-- Sent Message -->
+        <div class="bg-[#D9FDD3] p-3 rounded-xl rounded-tr-none text-xs text-stone-900 ml-auto max-w-[85%] shadow-2xs space-y-1">
+          <p id="wa-outgoing-body">नमस्ते विज्जू दीदी! आज 4 बजे स्नैक के बाद वीरा के साथ 5 मिनट कटोरी-चम्मच वाला खेल खेलिएगा। धन्यवाद!</p>
+          <div class="text-[10px] text-stone-500 text-right">9:41 AM ✓✓</div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div id="wa-typing" class="bg-white p-2.5 rounded-xl rounded-tl-none text-xs text-stone-500 mr-auto max-w-[50%] shadow-2xs flex items-center gap-1.5 hidden">
+          <span class="text-[11px] italic">Vijju is typing</span>
+          <span class="flex gap-0.5">
+            <span class="w-1.5 h-1.5 bg-stone-400 rounded-full animate-pulse-dot"></span>
+            <span class="w-1.5 h-1.5 bg-stone-400 rounded-full animate-pulse-dot" style="animation-delay: 0.2s"></span>
+            <span class="w-1.5 h-1.5 bg-stone-400 rounded-full animate-pulse-dot" style="animation-delay: 0.4s"></span>
+          </span>
+        </div>
+
+        <!-- Incoming Reply -->
+        <div id="wa-incoming-reply" class="bg-white p-3 rounded-xl rounded-tl-none text-xs text-stone-900 mr-auto max-w-[85%] shadow-2xs space-y-1 hidden">
+          <p>हाँ दीदी, बिल्कुल! 4 बजे दूध पिलाते समय ज़रूर कराऊँगी। 👍🏽</p>
+          <div class="text-[10px] text-stone-400 text-right">9:42 AM</div>
+        </div>
+      </div>
+
+      <!-- Footer CTA -->
+      <div class="p-3 bg-white border-t border-stone-200 flex items-center justify-between">
+        <span class="text-[11px] text-emerald-700 font-semibold">✓ Ready to send on WhatsApp</span>
+        <button onclick="closeWhatsAppModal()" class="px-4 py-1.5 bg-[#075E54] hover:bg-[#128C7E] text-white text-xs font-bold rounded-xl transition">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= RESEARCH DRAWER ================= -->
+  <div id="research-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-stone-900 text-stone-100 shadow-2xl z-50 p-5 transform translate-x-full transition-transform duration-300 overflow-y-auto space-y-4">
+    <div class="flex items-center justify-between pb-3 border-b border-stone-800">
+      <h3 class="text-sm font-bold text-amber-300">Viora UX Research & System Specs</h3>
+      <button onclick="toggleResearch(false)" class="text-stone-400 hover:text-white font-bold text-sm">✕</button>
+    </div>
+    
+    <div class="space-y-3 text-xs text-stone-300 leading-relaxed">
+      <div class="p-3 bg-stone-800/80 rounded-xl border border-stone-700">
+        <strong class="text-amber-400 block mb-1">Target Persona: Working Mother (2.6yo Vira, Nanny Vijju)</strong>
+        <p class="italic text-stone-400 text-[11px]">
+          &ldquo;I work full time. Routines are managed with our nanny Vijju, but I have immense uncertainty about speech milestones and zero time for 30-min Montessori setups.&rdquo;
+        </p>
+      </div>
+
+      <div class="p-3 bg-stone-800/80 rounded-xl border border-stone-700 space-y-1.5">
+        <strong class="text-white block">Core Product Principles</strong>
+        <div>• <strong>Single Priority Focus</strong>: 1 curated goal for 7 days rather than 30 milestones.</div>
+        <div>• <strong>Zero-Prep Kitchen Routines</strong>: 5 mins embedded during milk or snack time using steel bowls and sofa cushions.</div>
+        <div>• <strong>1-Tap Nanny Delegation</strong>: Pre-drafted Hindi & English WhatsApp cues so nannies execute autonomously.</div>
+        <div>• <strong>Guilt-Free Check-in</strong>: 10 seconds to record, validating busy days without penalty.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CLIENT JAVASCRIPT CONTROLLER ================= -->
+  <script>
+    // App State
+    let currentStage = 1;
+    let childName = 'Vira';
+    let childAgeYears = 2;
+    let childAgeMonths = 6;
+    let dailyMinutes = 10;
+    let currentLanguage = 'Hindi';
+
+    const ALL_SKILLS = [
+      'Speaks 25+ words',
+      'Points to items',
+      'Climbs & runs',
+      'Follows 2-step requests',
+      'Uses spoon alone'
+    ];
+    let selectedSkills = ['Speaks 25+ words', 'Climbs & runs'];
+
+    const ALL_INTERESTS = [
+      '🥣 Spoons & bowls',
+      '🚗 Toy cars',
+      '📚 Picture books',
+      '💧 Water play'
+    ];
+    let selectedInterests = ['🥣 Spoons & bowls', '🚗 Toy cars'];
+
+    // Timer state
+    let timerTotal = 300;
+    let timerRemaining = 300;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    // Initialize UI on load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderSkills();
+      renderInterests();
+      updateAllNameLabels();
+    });
+
+    function updateChildName(val) {
+      childName = val.trim() || 'Vira';
+      updateAllNameLabels();
+      updateWhatsAppText();
+    }
+
+    function updateAllNameLabels() {
+      document.querySelectorAll('.child-name-text').forEach(el => el.innerText = childName);
+    }
+
+    function updateAge() {
+      const y = document.getElementById('age-years').value;
+      const m = document.getElementById('age-months').value;
+      childAgeYears = Number(y);
+      childAgeMonths = Number(m);
+      const str = `${y}.${m}`;
+      document.getElementById('age-display').innerText = str;
+      document.getElementById('focus-age-badge').innerText = `${str}y`;
+    }
+
+    function renderSkills() {
+      const container = document.getElementById('skills-container');
+      container.innerHTML = '';
+      ALL_SKILLS.forEach(skill => {
+        const isSel = selectedSkills.includes(skill);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `px-2.5 py-1.5 rounded-xl transition border text-left ${
+          isSel 
+            ? 'bg-amber-500 text-stone-950 font-bold border-amber-500 shadow-2xs' 
+            : 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-700 font-medium'
+        }`;
+        btn.innerText = (isSel ? '✓ ' : '') + skill;
+        btn.onclick = () => {
+          if (selectedSkills.includes(skill)) {
+            selectedSkills = selectedSkills.filter(s => s !== skill);
+          } else {
+            selectedSkills.push(skill);
+          }
+          renderSkills();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderInterests() {
+      const container = document.getElementById('interests-container');
+      container.innerHTML = '';
+      ALL_INTERESTS.forEach(interest => {
+        const isSel = selectedInterests.includes(interest);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `px-2.5 py-1 rounded-lg transition border ${
+          isSel 
+            ? 'bg-emerald-100 text-emerald-900 font-bold border-emerald-300' 
+            : 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-700'
+        }`;
+        btn.innerText = interest;
+        btn.onclick = () => {
+          if (selectedInterests.includes(interest)) {
+            selectedInterests = selectedInterests.filter(i => i !== interest);
+          } else {
+            selectedInterests.push(interest);
+          }
+          renderInterests();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function setDailyMinutes(mins) {
+      dailyMinutes = mins;
+      document.getElementById('time-display').innerText = mins;
+      document.getElementById('window-label').innerText = `${mins} mins`;
+
+      [5, 10, 15].forEach(m => {
+        const b = document.getElementById('min-btn-' + m);
+        if (m === mins) {
+          b.className = 'py-2 rounded-xl border border-amber-500 bg-amber-50 text-amber-900 ring-1 ring-amber-500 font-bold transition';
+        } else {
+          b.className = 'py-2 rounded-xl border border-stone-200 bg-stone-50 text-stone-600 font-semibold transition';
+        }
+      });
+    }
+
+    // Stage Routing
+    function goToStage(stageNum) {
+      currentStage = stageNum;
+      for (let i = 1; i <= 4; i++) {
+        const section = document.getElementById('stage-' + i);
+        const tab = document.getElementById('tab-' + i);
+        if (i === stageNum) {
+          section.classList.remove('hidden');
+          tab.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        } else {
+          section.classList.add('hidden');
+          tab.className = 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-stone-400 hover:text-stone-200';
+        }
+      }
+      document.getElementById('step-indicator').innerText = `Step ${stageNum}/4`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextStage() {
+      if (currentStage < 4) goToStage(currentStage + 1);
+    }
+
+    // View mode: Mobile vs Desktop
+    function setViewMode(mode) {
+      const wrapper = document.getElementById('device-wrapper');
+      const phoneFrame = document.getElementById('phone-frame');
+      const mobileBtn = document.getElementById('view-mobile-btn');
+      const desktopBtn = document.getElementById('view-desktop-btn');
+
+      if (mode === 'desktop') {
+        wrapper.className = 'w-full max-w-xl my-auto transition-all duration-300';
+        phoneFrame.className = 'bg-white rounded-3xl p-6 shadow-xl border border-stone-200';
+        desktopBtn.className = 'px-2 py-1 rounded bg-amber-500 text-stone-950 font-bold flex items-center gap-1';
+        mobileBtn.className = 'px-2 py-1 rounded text-stone-400 hover:text-stone-200 flex items-center gap-1 font-medium';
+      } else {
+        wrapper.className = 'w-full max-w-[420px] my-auto transition-all duration-300';
+        phoneFrame.className = 'bg-stone-900 p-2.5 sm:p-3 rounded-[40px] shadow-2xl ring-1 ring-stone-800/80 border-4 border-stone-800';
+        mobileBtn.className = 'px-2 py-1 rounded bg-amber-500 text-stone-950 font-bold flex items-center gap-1';
+        desktopBtn.className = 'px-2 py-1 rounded text-stone-400 hover:text-stone-200 flex items-center gap-1 font-medium';
+      }
+    }
+
+    // Activity checkmark toggle
+    function toggleCardDone(cardId) {
+      const card = document.getElementById(cardId);
+      card.classList.toggle('border-emerald-400');
+      card.classList.toggle('bg-emerald-50/20');
+    }
+
+    // Language & WhatsApp messaging
+    function setLanguage(lang) {
+      currentLanguage = lang;
+      const btnHi = document.getElementById('lang-btn-hi');
+      const btnEn = document.getElementById('lang-btn-en');
+      if (lang === 'Hindi') {
+        btnHi.className = 'px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-500 text-stone-950';
+        btnEn.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-stone-100 text-stone-600';
+      } else {
+        btnEn.className = 'px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-500 text-stone-950';
+        btnHi.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-stone-100 text-stone-600';
+      }
+      updateWhatsAppText();
+    }
+
+    function updateWhatsAppText() {
+      const textEl = document.getElementById('whatsapp-body-text');
+      if (currentLanguage === 'Hindi') {
+        textEl.innerText = `नमस्ते विज्जू दीदी! आज 4 बजे स्नैक के बाद ${childName} के साथ 5 मिनट कटोरी-चम्मच वाला खेल खेलिएगा। चम्मच बजाते समय बोलिए "तेज़ बजाओ" ताकि वह 2 शब्द बोलना सीखे। धन्यवाद!`;
+      } else {
+        textEl.innerText = `Hi Vijju didi! Please do the 5-min spoon tap game with ${childName} after 4 PM snack. Tap bowls and say "Play fast" or "Play slow" so she practices 2-word phrases. Thank you!`;
+      }
+    }
+
+    function copyMessage() {
+      const text = document.getElementById('whatsapp-body-text').innerText;
+      navigator.clipboard.writeText(text);
+      const lbl = document.getElementById('copy-label');
+      lbl.innerText = 'Copied!';
+      setTimeout(() => lbl.innerText = 'Copy', 1500);
+    }
+
+    // Reflection Toast
+    function recordFeedback(type) {
+      const toast = document.getElementById('reflection-toast');
+      const text = document.getElementById('toast-text');
+      toast.classList.remove('hidden');
+
+      if (type === 'loved') {
+        text.innerText = `Great! ${childName} engaged well. Tomorrow builds on this.`;
+      } else if (type === 'nanny') {
+        text.innerText = `Done! Vijju completed it today without you.`;
+      } else {
+        text.innerText = `Zero guilt! Busy days happen. Tomorrow is fresh.`;
+      }
+    }
+
+    // Timer Modal
+    function launchTimer(title, seconds) {
+      document.getElementById('modal-activity-title').innerText = title;
+      timerTotal = seconds;
+      timerRemaining = seconds;
+      updateTimerUI();
+      document.getElementById('timer-modal').classList.remove('hidden');
+    }
+
+    function closeTimerModal() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      document.getElementById('timer-modal').classList.add('hidden');
+      document.getElementById('modal-timer-play-btn').innerText = 'Start';
+      document.getElementById('modal-timer-play-btn').className = 'px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition';
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('modal-timer-play-btn');
+      if (!isTimerRunning) {
+        isTimerRunning = true;
+        btn.innerText = 'Pause';
+        btn.className = 'px-5 py-2 bg-stone-800 hover:bg-stone-900 text-white rounded-xl text-xs font-bold transition';
+        timerInterval = setInterval(() => {
+          if (timerRemaining > 0) {
+            timerRemaining--;
+            updateTimerUI();
+          } else {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            btn.innerText = 'Done!';
+          }
+        }, 1000);
+      } else {
+        isTimerRunning = false;
+        clearInterval(timerInterval);
+        btn.innerText = 'Resume';
+        btn.className = 'px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition';
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      timerRemaining = timerTotal;
+      updateTimerUI();
+      const btn = document.getElementById('modal-timer-play-btn');
+      btn.innerText = 'Start';
+      btn.className = 'px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition';
+    }
+
+    function updateTimerUI() {
+      const m = Math.floor(timerRemaining / 60);
+      const s = timerRemaining % 60;
+      document.getElementById('modal-timer-digits').innerText = 
+        String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function finishTimerAndWrapUp() {
+      closeTimerModal();
+      goToStage(4);
+    }
+
+    // WhatsApp Simulation Modal
+    function openWhatsAppModal(title) {
+      const outgoing = document.getElementById('wa-outgoing-body');
+      outgoing.innerText = document.getElementById('whatsapp-body-text').innerText;
+      document.getElementById('wa-typing').classList.add('hidden');
+      document.getElementById('wa-incoming-reply').classList.add('hidden');
+      document.getElementById('whatsapp-modal').classList.remove('hidden');
+
+      // Realistic typing indicator and reply
+      setTimeout(() => {
+        document.getElementById('wa-typing').classList.remove('hidden');
+        setTimeout(() => {
+          document.getElementById('wa-typing').classList.add('hidden');
+          document.getElementById('wa-incoming-reply').classList.remove('hidden');
+        }, 1400);
+      }, 700);
+    }
+
+    function closeWhatsAppModal() {
+      document.getElementById('whatsapp-modal').classList.add('hidden');
+    }
+
+    function toggleResearch(open) {
+      const drawer = document.getElementById('research-drawer');
+      if (open) {
+        drawer.classList.remove('translate-x-full');
+      } else {
+        drawer.classList.add('translate-x-full');
+      }
+    }
+  </script>
+</body>
+</html>

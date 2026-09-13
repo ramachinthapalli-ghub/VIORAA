@@ -1,0 +1,6 @@
+{
+  "name": "Viora",
+  "description": "Working mother's companion: intuitive child developmental micro-play and effortless caregiver delegation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
